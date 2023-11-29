@@ -1,4 +1,6 @@
-﻿using System;
+﻿using com.sun.org.apache.xml.@internal.resolver.helpers;
+using com.sun.org.apache.xml.@internal.security.keys;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,10 +8,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 internal class Program
 {
-    private static void Main(string[] args)
+    public static void Main(string[] args)
     {
         var pause = false;
         var IsServerSocket = false;
@@ -29,13 +32,17 @@ internal class Program
 
                 if (!serverSocket.Server.IsBound)
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.Error.WriteLine("Another instance of the application is already running. Exiting...");
+                    Console.ForegroundColor = ConsoleColor.White;
                     Environment.Exit(0);
                 }
             }
             catch (IOException)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Unable to start the application. Exiting...");
+                Console.ForegroundColor = ConsoleColor.White;
                 Environment.Exit(0);
             }
         }
@@ -45,37 +52,11 @@ internal class Program
 
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("----------------------------");
-        Console.WriteLine("Press 'P' to pause, press again to continue");
-        Console.WriteLine("Press 'Enter' to refresh log");
-        Console.WriteLine("----------------------------");
 
         Console.WriteLine("Blockerc working.....");
 
         while (true)
         {
-            while (Console.ReadKey().Key == ConsoleKey.P)
-            {
-                Console.Clear();
-                pause = !pause;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Blocker paused, press 'P' to continue");
-                Thread.Sleep(200);
-                if (!pause)
-                {
-                    Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Blockerc, created by s17179XTY");
-
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.WriteLine("----------------------------");
-                    Console.WriteLine("Press 'P' to pause, press again to continue");
-                    Console.WriteLine("Press 'Enter' to refresh log");
-                    Console.WriteLine("----------------------------");
-
-                    Console.WriteLine("Blockerc working.....");
-                }
-            }
-
             if (!pause)
             {
                 List<string> blacklist = GetBlacklist();
@@ -99,7 +80,9 @@ internal class Program
                             catch (Exception ex)
                             {
                                 string errorMessage = $"Error blocking process '{processName}': {ex.Message}";
+                                Console.ForegroundColor = ConsoleColor.Red;
                                 Console.WriteLine(errorMessage);
+                                Console.ForegroundColor = ConsoleColor.White;
                             }
                         }
 
@@ -112,7 +95,9 @@ internal class Program
                 }
                 else
                 {
-                    Console.WriteLine("Error finding files");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error finding files");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
 
                 GC.Collect();
