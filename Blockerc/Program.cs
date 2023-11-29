@@ -1,18 +1,11 @@
-﻿using System.Diagnostics;
-using System.Drawing;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Sockets;
 using System.Threading;
-using java.awt;
-using java.awt.@event;
 
 internal class Program
 {
@@ -26,7 +19,7 @@ internal class Program
         var backoffDelay = INITIAL_DELAY;
         var MONITOR_INTERVAL = 10;
 
-        if (IsServerSocket == false)
+        if (!IsServerSocket)
         {
             try
             {
@@ -51,104 +44,111 @@ internal class Program
         Console.WriteLine("Blockerc, created by s17179XTY");
 
         Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("" +
-            "---------------------" +
-            "");
+        Console.WriteLine("----------------------------");
+        Console.WriteLine("Press 'P' to pause, press again to continue");
+        Console.WriteLine("Press 'Enter' to refresh log");
+        Console.WriteLine("----------------------------");
+
         Console.WriteLine("Blockerc working.....");
+
         while (true)
         {
-            if (!pause && GetBlacklist() != null)
+            while (Console.ReadKey().Key == ConsoleKey.P)
+            {
+                Console.Clear();
+                pause = !pause;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Blocker paused, press 'P' to continue");
+                Thread.Sleep(200);
+                if (!pause)
+                {
+                    Console.Clear();
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Blockerc, created by s17179XTY");
+
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("----------------------------");
+                    Console.WriteLine("Press 'P' to pause, press again to continue");
+                    Console.WriteLine("Press 'Enter' to refresh log");
+                    Console.WriteLine("----------------------------");
+
+                    Console.WriteLine("Blockerc working.....");
+                }
+            }
+
+            if (!pause)
             {
                 List<string> blacklist = GetBlacklist();
 
-                foreach (var processName in blacklist)
+                if (blacklist != null)
                 {
-                    Process[] processes = Process.GetProcessesByName(processName);
+                    foreach (var processName in blacklist)
+                    {
+                        Process[] processes = Process.GetProcessesByName(processName);
 
-                    foreach (var process in processes)
-                    {
-                        try
+                        foreach (var process in processes)
                         {
-                            Thread.Sleep(backoffDelay);
-                            process.Kill();
-                            string logMessage = $"Blocked and terminated process '{processName}'";
-                            Console.WriteLine(logMessage);
-                            backoffDelay = INITIAL_DELAY;
+                            try
+                            {
+                                Thread.Sleep(backoffDelay);
+                                process.Kill();
+                                string logMessage = $"Blocked and terminated process '{processName}'";
+                                Console.WriteLine(logMessage);
+                                backoffDelay = INITIAL_DELAY;
+                            }
+                            catch (Exception ex)
+                            {
+                                string errorMessage = $"Error blocking process '{processName}': {ex.Message}";
+                                Console.WriteLine(errorMessage);
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            string errorMessage = $"Error blocking process '{processName}': {ex.Message}";
-                            Console.WriteLine(errorMessage);
-                        }
-                    }
-                    try
-                    {
+
                         Thread.Sleep(MONITOR_INTERVAL);
                         if (backoffDelay < MAX_DELAY)
                         {
                             backoffDelay *= 2;
                         }
                     }
-                    catch (ThreadInterruptedException e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
                 }
-                //Thread.Sleep(500);
+                else
+                {
+                    Console.WriteLine("Error finding files");
+                }
 
-            }
-            else if (GetBlacklist() == null)
-            {
-                string NullMessage = $"Error finding files";
-                Console.WriteLine(NullMessage);
-            }
-            else
-            {
-                try
-                {
-                    Console.Clear();
-                    Thread.Sleep(200);
-                }
-                catch (ThreadInterruptedException ex)
-                {
-                    Console.WriteLine(ex.StackTrace);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine(e.StackTrace);
-                }
                 GC.Collect();
             }
-        }
-        
 
-        List<string>? GetBlacklist()
+            Thread.Sleep(200);
+        }
+    }
+
+    private static List<string>? GetBlacklist()
+    {
+        List<string> fileNames = new List<string>();
+
+        try
         {
-            List<string> fileNames = new List<string>();
-            try
+            var paths = Directory.GetFiles("C:\\Program Files\\DyKnow\\", "*.exe", SearchOption.AllDirectories);
+            foreach (var path in paths)
             {
-                var paths = Directory.GetFiles("C:\\Program Files\\DyKnow\\", "*.exe", SearchOption.AllDirectories);
-                foreach (var path in paths)
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                if (!fileName.Equals("DyKnow", StringComparison.OrdinalIgnoreCase))
                 {
-                    string fileName = Path.GetFileName(path);
-                    fileName = Path.GetFileNameWithoutExtension(fileName);
-                    //fileNames.Add(fileName);
-                    if (!fileName.Equals("DyKnow", StringComparison.OrdinalIgnoreCase))
-                    {
-                        fileNames.Add(fileName);
-                    }
+                    fileNames.Add(fileName);
                 }
             }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ex.StackTrace);
-            }
-            if (fileNames.Count == 0)
-            {
-                Thread.Sleep(1000);
-                return null;
-            }
-            return fileNames;
         }
+        catch (IOException ex)
+        {
+            Console.WriteLine(ex.StackTrace);
+        }
+
+        if (fileNames.Count == 0)
+        {
+            Thread.Sleep(1000);
+            return null;
+        }
+
+        return fileNames;
     }
 }
