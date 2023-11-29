@@ -54,13 +54,11 @@ internal class Program
         Console.WriteLine("" +
             "---------------------" +
             "");
-
-        if (!pause)
+        Console.WriteLine("Blockerc working.....");
+        while (true)
         {
-            Console.WriteLine("Blockerc working.....");
-            while (true)
+            if (!pause && GetBlacklist() != null)
             {
-
                 List<string> blacklist = GetBlacklist();
 
                 foreach (var processName in blacklist)
@@ -97,27 +95,34 @@ internal class Program
                     }
                 }
                 //Thread.Sleep(500);
-            }
-        }
-        else
-        {
-            try
-            {
-                Console.Clear();
-                Thread.Sleep(200);
-            }
-            catch (ThreadInterruptedException ex)
-            {
-                Console.WriteLine(ex.StackTrace);
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine(e.StackTrace);
-            }
-            GC.Collect();
-        }
 
-        List<string> GetBlacklist()
+            }
+            else if (GetBlacklist() == null)
+            {
+                string NullMessage = $"Error finding files";
+                Console.WriteLine(NullMessage);
+            }
+            else
+            {
+                try
+                {
+                    Console.Clear();
+                    Thread.Sleep(200);
+                }
+                catch (ThreadInterruptedException ex)
+                {
+                    Console.WriteLine(ex.StackTrace);
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+                GC.Collect();
+            }
+        }
+        
+
+        List<string>? GetBlacklist()
         {
             List<string> fileNames = new List<string>();
             try
@@ -137,6 +142,11 @@ internal class Program
             catch (IOException ex)
             {
                 Console.WriteLine(ex.StackTrace);
+            }
+            if (fileNames.Count == 0)
+            {
+                Thread.Sleep(1000);
+                return null;
             }
             return fileNames;
         }
