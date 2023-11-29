@@ -10,6 +10,8 @@
     <Company>s17179XTY</Company>
     <PackageIcon>trayIcon.png</PackageIcon>
     <NeutralLanguage>en</NeutralLanguage>
+    <Authors>s17179XTY</Authors>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +20,10 @@
 
   <ItemGroup>
     <None Include="..\..\KillDyKnow_source_from_Procyon\lowest_cpu_version\trayIcon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
